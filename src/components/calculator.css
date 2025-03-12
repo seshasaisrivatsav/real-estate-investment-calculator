@@ -1,0 +1,89 @@
+.calculator-container {
+  font-family: Arial, sans-serif;
+  margin: 20px auto; /* Centering the container */
+  padding: 20px;
+  max-width: 1200px; /* Maximum width for the entire container */
+}
+
+.input-container-row {
+  display: flex;
+  flex-wrap: wrap; /* Allows input fields to wrap on smaller screens */
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.input-container {
+  margin-bottom: 10px;
+  width: 22%;
+}
+
+@media (max-width: 768px) {
+  .input-container {
+    width: 48%; /* Reduce width on smaller screens */
+  }
+}
+
+input {
+  padding: 5px;
+  width: 100%;
+  margin-left: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  margin-top: 20px;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  width: 100%; /* Make the button full width */
+}
+
+.loan-amount-display {
+  margin-top: 20px;
+}
+
+.output-container, .summary-container {
+  margin-top: 30px;
+}
+
+.output-table {
+  width: 80%;
+  max-width: 1000px; /* Restrict table width */
+  border-collapse: collapse;
+  margin: 20px auto;
+}
+
+@media (max-width: 768px) {
+  .output-table {
+    width: 100%; /* Allow table to take full width on small screens */
+  }
+}
+
+.output-table th, .output-table td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: center;
+}
+
+.output-table th {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.output-table td {
+  background-color: #f9f9f9;
+}
+
+.summary-container h2 {
+  margin: 10px 0;
+}
+
+.summary-container ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.summary-container ul li {
+  margin: 5px 0;
+}
