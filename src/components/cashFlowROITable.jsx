@@ -5,7 +5,7 @@ function CashFlowROITable({ cashFlowROI }) {
   
   return (
     <div className="output-container">
-      <h2>Cash Flow ROI:</h2>
+      <h2>Cash Flow ROI</h2>
       <table className="output-table">
         <thead>
           <tr>

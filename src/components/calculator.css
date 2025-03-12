@@ -67,7 +67,7 @@ button {
 }
 
 .output-table th {
-  background-color: #4CAF50;
+  background-color: green;
   color: white;
 }
 
@@ -86,4 +86,36 @@ button {
 
 .summary-container ul li {
   margin: 5px 0;
+}
+
+.tables-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Space between rows */
+}
+
+.table-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px; /* Space between tables */
+}
+
+.table-row > * {
+  flex: 1; /* Ensures each table takes equal width */
+  min-width: 45%;
+}
+
+.estimate-button {
+  background-color: #007bff; /* Blue background */
+  color: white;              /* White text */
+  font-size: 18px;           /* Larger text */
+  padding: 10px 20px;        /* Padding around the text */
+  border: none;              /* Remove border */
+  border-radius: 5px;        /* Rounded corners */
+  cursor: pointer;          /* Pointer cursor on hover */
+  transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.estimate-button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
 }

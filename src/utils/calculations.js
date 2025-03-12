@@ -1,16 +1,19 @@
 
-/**
- * 
- * @param inputData 
- * homePrice, downpaymentPercentage, interestRate, loanTerm, 
-      estimatedRent, hoa, annualMaintenance, propertyTaxPercentage, propertyManagementFeePercentage
- */
-const calculateEverything = ({homePrice, downpaymentPercentage, interestRate, loanTerm, 
-  estimatedRent, hoa, annualMaintenance, propertyTaxPercentage, propertyManagementFeePercentage}) => {
+const calculateEverything = ({
+  homePrice, 
+  downpaymentPercentage, 
+  interestRate, 
+  loanTerm, 
+  estimatedRent, 
+  hoa, 
+  annualMaintenance, 
+  propertyTaxPercentage, 
+  propertyManagementFeePercentage
+}) => {
+
   const downpayment = (homePrice*downpaymentPercentage)/100;
   // STEP 1: [ { year: 1 , interestPaid: xx, principalPaid: xx, monthlyPayment: xx}]
   const amortization = calculateAmortization( (homePrice*(100-downpaymentPercentage)/100), interestRate, loanTerm );
-
 
   // STEP 2: { monthly: {rent, propertyTax, hoa, maintenance, propertyManagementFee, mortgage}, yearly }
   const totalExpenses = calculateExpenses({estimatedRent, homePrice, hoa, 
@@ -142,7 +145,7 @@ const calculateROI = ({ homePrice, annualCashFlow, downpayment }) => {
       const totalCashFlow = years * annualCashFlow;
       const roi = ((totalCashFlow + capitalGain) * 100) / downpayment;
 
-      res[years][`${(rate * 100).toFixed(0)}Percent`] = roi;
+      res[years][`${(rate * 100).toFixed(0)}Percent`] = roi.toFixed(2);
     });
   });
 
