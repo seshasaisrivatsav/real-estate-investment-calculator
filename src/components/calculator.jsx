@@ -144,12 +144,12 @@ function Calculator() {
   const breakdownData = React.useMemo(
     () => [
       {
-        item: "Monthly Rent",
+        item: "Rent",
         monthly: estimatedRent.toFixed(2),
         yearly: (estimatedRent * 12).toFixed(2),
       },
       {
-        item: "Monthly Cost",
+        item: "Expenses",
         monthly: monthlyCosts.toFixed(2),
         yearly: (monthlyCosts * 12).toFixed(2),
       },
@@ -257,7 +257,7 @@ function Calculator() {
         </div>
 
         <div className="loan-amount-display">
-          <h4>Loan Amount: ${loanAmount.toFixed(2)}</h4>
+          <h4>Loan Amount: ${loanAmount.toFixed(2)} | Downpayment : ${homePrice-loanAmount}</h4>
         </div>
       </div>
 
