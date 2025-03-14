@@ -1,32 +1,8 @@
 .calculator-container {
   font-family: Arial, sans-serif;
-  margin: 20px auto; /* Centering the container */
+  margin: 20px auto;
   padding: 20px;
-  max-width: 1200px; /* Maximum width for the entire container */
-}
-
-.input-container-row {
-  display: flex;
-  flex-wrap: wrap; /* Allows input fields to wrap on smaller screens */
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.input-container {
-  margin-bottom: 10px;
-  width: 22%;
-}
-
-@media (max-width: 768px) {
-  .input-container {
-    width: 48%; /* Reduce width on smaller screens */
-  }
-}
-
-input {
-  padding: 5px;
-  width: 100%;
-  margin-left: 10px;
+  max-width: 1200px;
 }
 
 button {
@@ -36,7 +12,7 @@ button {
   background-color: #4CAF50;
   color: white;
   border: none;
-  width: 100%; /* Make the button full width */
+  width: 100%;
 }
 
 .loan-amount-display {
@@ -49,14 +25,14 @@ button {
 
 .output-table {
   width: 80%;
-  max-width: 1000px; /* Restrict table width */
+  max-width: 1000px;
   border-collapse: collapse;
   margin: 20px auto;
 }
 
 @media (max-width: 768px) {
   .output-table {
-    width: 100%; /* Allow table to take full width on small screens */
+    width: 100%;
   }
 }
 
@@ -91,31 +67,31 @@ button {
 .tables-container {
   display: flex;
   flex-direction: column;
-  gap: 20px; /* Space between rows */
+  gap: 20px;
 }
 
 .table-row {
   display: flex;
   justify-content: space-between;
-  gap: 20px; /* Space between tables */
+  gap: 20px;
 }
 
 .table-row > * {
-  flex: 1; /* Ensures each table takes equal width */
+  flex: 1;
   min-width: 45%;
 }
 
 .estimate-button {
-  background-color: #007bff; /* Blue background */
-  color: white;              /* White text */
-  font-size: 18px;           /* Larger text */
-  padding: 10px 20px;        /* Padding around the text */
-  border: none;              /* Remove border */
-  border-radius: 5px;        /* Rounded corners */
-  cursor: pointer;          /* Pointer cursor on hover */
-  transition: background-color 0.3s ease; /* Smooth transition */
+  background-color: #007bff;
+  color: white;
+  font-size: 18px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .estimate-button:hover {
-  background-color: #0056b3; /* Darker blue on hover */
+  background-color: #0056b3;
 }

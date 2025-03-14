@@ -1,6 +1,6 @@
 import React from 'react';
-import BlockFormula from './utilComponents/blockFormula';
-import InlineFormula from './utilComponents/inlineFormula';
+import BlockFormula from '../utilComponents/blockFormula';
+import InlineFormula from '../utilComponents/inlineFormula';
 
 function CashFlowROITable({ cashFlowROI }) {
   const cashFlowYears = Object.keys(cashFlowROI); // Get the years (keys)
@@ -24,14 +24,15 @@ function CashFlowROITable({ cashFlowROI }) {
           ))}
         </tbody>
       </table>
-      <p>This table gives the ROI just for cash</p>
-      <p>
-        <strong>Cash Flow ROI:</strong>
-        <BlockFormula formula="Cashflow = Rent - (PropertyTax + HOA + Maintenance + PropertyManagementFee + Mortgage)" />
+      <div> {/* Replace <p> with <div> */}
+        <p>This table gives the ROI just for cash</p>
+        <p>
+          <strong>Cash Flow ROI:</strong>
+        </p>
+        <InlineFormula formula="Cashflow = Rent - (PropertyTax + HOA + Maintenance + PropertyManagementFee + Mortgage)" />
         <BlockFormula formula="InitialInvestment = Downpayment + ClosingCosts + InitialCosts" />
         <BlockFormula formula="CashflowROI = \frac{100* (noOfYears*Cashflow)}{InitialInvestment}" />
-      </p>
-
+      </div>
     </div>
   );
 }

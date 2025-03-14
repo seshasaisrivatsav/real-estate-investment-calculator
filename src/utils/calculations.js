@@ -8,7 +8,9 @@ const calculateEverything = ({
   hoa, 
   annualMaintenance, 
   propertyTaxPercentage, 
-  propertyManagementFeePercentage
+  propertyManagementFeePercentage,
+  closingCosts,
+  initialRepairs
 }) => {
 
   const downpayment = (homePrice*downpaymentPercentage)/100;
@@ -22,11 +24,12 @@ const calculateEverything = ({
   // STEP 3: calculate cashflow { monthlyCashFlow: xx, yaerlyCashFlow: xx }
   const cashFlow = calculateCashFlow(totalExpenses);
 
+  const initialCosts = closingCosts + initialRepairs + downpayment;
   // STEP 4: calculate ROI
-  const equityROI = calculateROI({ homePrice, annualCashFlow: cashFlow.yearlyCashFlow, downpayment });
+  const equityROI = calculateROI({ homePrice, annualCashFlow: cashFlow.yearlyCashFlow, initialCosts });
 
   // STEP 5: calculate Cashflow ROI
-  const cashFlowROI = calculateCashFlowROI({ downpayment, annualCashFlow: cashFlow.yearlyCashFlow });
+  const cashFlowROI = calculateCashFlowROI({ initialCosts, annualCashFlow: cashFlow.yearlyCashFlow });
 
   return {
     amortization,
@@ -86,9 +89,11 @@ const calculateAmortization = (loanAmount, interestRate, loanTerm) => {
 
 const calculateExpenses = ({estimatedRent, homePrice, hoa, 
   propertyTaxPercentage, monthlyPayment, annualMaintenance, propertyManagementFeePercentage}) => {
-
   const res = {};
+
   res.monthly = {
+    monthlyCosts:  monthlyPayment+ (homePrice*propertyTaxPercentage/100)/12 + hoa + (annualMaintenance/12) + 
+    (estimatedRent*propertyManagementFeePercentage/100), 
     rent: estimatedRent,
     propertyTax: (homePrice*propertyTaxPercentage/100)/12,
     hoa: hoa, 
@@ -97,6 +102,7 @@ const calculateExpenses = ({estimatedRent, homePrice, hoa,
     mortgage: monthlyPayment 
   }
   res.yearly = {
+    yearlyCosts: res.monthly.monthlyCosts*12,
     rent: estimatedRent*12,
     propertyTax: (homePrice*propertyTaxPercentage/100),
     hoa: hoa*12, 
@@ -130,7 +136,7 @@ capitalGain = (futureHomeValue) - (purchasePrice)
 totalInvestment = downPayment+closingCosts+InitialReparirs
 
  */
-const calculateROI = ({ homePrice, annualCashFlow, downpayment }) => {
+const calculateROI = ({ homePrice, annualCashFlow, initialCosts }) => {
   const appreciationRates = [0.02, 0.03, 0.04];
   const yearsList = [5, 10, 15]; 
   
@@ -143,7 +149,7 @@ const calculateROI = ({ homePrice, annualCashFlow, downpayment }) => {
       const salePrice = calculateAppreciation(homePrice, years, rate);
       const capitalGain = salePrice - homePrice;
       const totalCashFlow = years * annualCashFlow;
-      const roi = ((totalCashFlow + capitalGain) * 100) / downpayment;
+      const roi = ((totalCashFlow + capitalGain) * 100) / initialCosts;
 
       res[years][`${(rate * 100).toFixed(0)}Percent`] = roi.toFixed(2);
     });
@@ -152,13 +158,13 @@ const calculateROI = ({ homePrice, annualCashFlow, downpayment }) => {
   return res;
 };
 
-const calculateCashFlowROI = ({downpayment, annualCashFlow}) => {
+const calculateCashFlowROI = ({initialCosts, annualCashFlow}) => {
   //  const initialCosts =  DownPayment+closingcosts+remodelling;
   // const cashFlow =  annualCashFlow/initialcosts;
   const res = {};
-  res['5'] = 100*(5*annualCashFlow)/downpayment;
-  res['10'] = 100*(10*annualCashFlow)/downpayment;
-  res['15'] = 100*(15*annualCashFlow)/downpayment;
+  res['5'] = 100*(5*annualCashFlow)/initialCosts;
+  res['10'] = 100*(10*annualCashFlow)/initialCosts;
+  res['15'] = 100*(15*annualCashFlow)/initialCosts;
 
   return res;
 }

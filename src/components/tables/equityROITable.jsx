@@ -1,6 +1,5 @@
 import React from 'react';
-import InlineFormula from './utilComponents/inlineFormula';
-import BlockFormula from './utilComponents/blockFormula';
+import BlockFormula from '../utilComponents/blockFormula';
 
 function EquityROITable({ equityROI }) {
   return (
@@ -28,13 +27,13 @@ function EquityROITable({ equityROI }) {
         </tbody>
       </table>
       <p>This table gives the equity value for 5, 10, 15 years if the property values rose by 2, 3 and 4%</p>
-      <p>
+      <div>
         <strong>Equity ROI:</strong>
         <BlockFormula formula="\text{AppraisedHomeValue}_{\text{future}} = \text{HomeValue}_{\text{initial}} \times (1 + \text{AppreciationRate})^{\text{Years}}" />
         <BlockFormula formula="CapitalGain = AppraisedHomeValue  - HomePurchasePrice" />
         <BlockFormula formula="InitialInvestment = Downpayment + ClosingCosts + InitialCosts" />
         <BlockFormula formula="CapitalGainROI = \frac{(TotalCashFlow + CapitalGain) * 100}{InitialInvestment}" />
-      </p>
+      </div>
     </div>
   );
 }

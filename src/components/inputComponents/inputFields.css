@@ -1,0 +1,37 @@
+.input-container-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.input-container {
+  margin-bottom: 10px;
+  width: 13%; /* Adjusted to fit 7 fields in a row */
+  min-width: 120px;
+}
+
+.input-container label {
+  font-size: 14px;
+}
+
+.input-container input {
+  padding: 8px; /* Reduced padding */
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px; /* Smaller font size for inputs */
+  transition: border-color 0.3s ease;
+}
+
+.input-container input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+  .input-container {
+    width: 48%; /* Adjusted for responsiveness */
+  }
+}
