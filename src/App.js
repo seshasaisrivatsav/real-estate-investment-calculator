@@ -6,7 +6,7 @@ import DataAnalysis from './components/DataAnalysis';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/real-estate-investment-calculator">
       <div className="App">
         <Header />
         <Routes>
