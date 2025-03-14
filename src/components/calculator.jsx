@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { calculateEverything } from "../utils/calculations";
 import ExpensesBreakdownTable from "./tables/expensesBreakdownTable";
 import InputFields from "./inputComponents/inputFields";
@@ -8,7 +9,9 @@ import EquityROITable from "./tables/equityROITable";
 import "./calculator.css";
 
 function Calculator() {
-  // Inputs
+  const navigate = useNavigate();
+
+  // Inputs state
   const [inputs, setInputs] = useState({
     homePrice: 500000,
     downpaymentPercentage: 60,
@@ -18,13 +21,23 @@ function Calculator() {
     hoa: 0,
     annualMaintenance: 7500,
     propertyTaxPercentage: 1.25,
-    annualPropertyTax: (1.25/100)*500000,
+    annualPropertyTax: (1.25 / 100) * 500000,
     propertyManagementFeePercentage: 10,
     closingCosts: 15000,
-    initialRepairs: 4000
+    initialRepairs: 4000,
   });
 
- 
+  // Calculations state
+  const [amortizationData, setAmortizationData] = useState([]);
+  const [propertyManagementFee, setPropertyManagementFee] = useState(0);
+  const [propertyManagementFeeYearly, setPropertyManagementFeeYearly] = useState(0);
+  const [loanAmount, setLoanAmount] = useState(0);
+  const [monthlyCashFlow, setMonthlyCashFlow] = useState(0);
+  const [monthlyCosts, setMonthlyCosts] = useState(0);
+  const [equityROI, setEquityROI] = useState({});
+  const [cashFlowROI, setCashFlowROI] = useState({});
+
+  // Handle input changes
   const handleInputChange = (field, value) => {
     const newValue = Number(value);
 
@@ -50,17 +63,7 @@ function Calculator() {
     }
   };
 
-
-  // Calculations
-  const [amortizationData, setAmortizationData] = useState([]);
-  const [propertyManagementFee, setPropertyManagementFee] = useState(0);
-  const [propertyManagementFeeYearly, setPropertyManagementFeeYearly] = useState(0);
-  const [loanAmount, setLoanAmount] = useState(0);
-  const [monthlyCashFlow, setMonthlyCashFlow] = useState(0);
-  const [monthlyCosts, setMonthlyCosts] = useState(0);
-  const [equityROI, setEquityROI] = useState({});
-  const [cashFlowROI, setCashFlowROI] = useState({});
-
+  // Calculate loan amount and property management fee
   useEffect(() => {
     const downpayment = inputs.homePrice * (inputs.downpaymentPercentage / 100);
     const loanAmount = inputs.homePrice - downpayment;
@@ -70,6 +73,7 @@ function Calculator() {
     setPropertyManagementFee(monthlyPropertyManagementFee);
   }, [inputs]);
 
+  // Calculate all data
   const calculateData = () => {
     const everyDetail = calculateEverything(inputs);
     console.log(everyDetail);
@@ -83,6 +87,18 @@ function Calculator() {
     setMonthlyCashFlow(everyDetail.cashFlow.monthlyCashFlow);
   };
 
+  // Navigate to Data Analysis page
+  const goToDataAnalysis = () => {
+    const everyDetail = calculateEverything(inputs); // Calculate everything
+    navigate("/data-analysis", {
+      state: {
+        inputs,
+        analytics: everyDetail, // Pass all analytics
+      },
+    });
+  };
+
+  // Memoized costs data
   const costsData = React.useMemo(
     () => [
       { item: "Rent", monthly: inputs.estimatedRent.toFixed(2), yearly: (inputs.estimatedRent * 12).toFixed(2) },
@@ -95,6 +111,7 @@ function Calculator() {
     [inputs, propertyManagementFee, propertyManagementFeeYearly, amortizationData]
   );
 
+  // Memoized breakdown data
   const breakdownData = React.useMemo(
     () => [
       { item: "Rent", monthly: inputs.estimatedRent.toFixed(2), yearly: (inputs.estimatedRent * 12).toFixed(2) },
@@ -109,6 +126,7 @@ function Calculator() {
       <h1>Real Estate Investment Calculator</h1>
       <InputFields inputs={inputs} handleInputChange={handleInputChange} loanAmount={loanAmount} />
       <button className="estimate-button" onClick={calculateData}>Estimate ROI & CashFlow</button>
+      <button className="analysis-button" onClick={goToDataAnalysis}>Go to Data Analysis</button>
       <div className="tables-container">
         <div className="table-row">
           <ExpensesBreakdownTable data={costsData} />
