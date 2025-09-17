@@ -12,6 +12,9 @@ const Header = () => {
           <li style={styles.navItem}>
             <Link to="/data-analysis" style={styles.link}>Data Analysis</Link>
           </li>
+          <li style={styles.navItem}>
+            <Link to="/roi-calculator" style={styles.link}>ROI Calculator</Link>
+          </li>
         </ul>
       </nav>
     </header>

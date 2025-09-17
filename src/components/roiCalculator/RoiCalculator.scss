@@ -1,0 +1,140 @@
+.rc-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px;
+  color: #111;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Sans";
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 16px;
+}
+
+h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.rc-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.rc-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rc-card-body {
+  margin-top: 12px;
+}
+
+.rc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+
+  @media (min-width: 900px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.rc-row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 12px;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.rc-label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.rc-control {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.rc-input {
+  width: 180px;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+}
+
+.rc-slider {
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #6366f1, #22c55e);
+  outline: none;
+
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #111;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+  }
+}
+
+.rc-table-wrap {
+  overflow: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.rc-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+
+  thead th {
+    background: #f8fafc;
+    color: #334155;
+    font-weight: 700;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+  }
+
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eef2f7;
+    white-space: nowrap;
+  }
+}
+
+.rc-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rc-badge {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.rc-muted {
+  color: #475569;
+}
