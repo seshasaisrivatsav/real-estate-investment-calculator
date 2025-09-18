@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/real-estate-investment-calculator/static/css/main.7982113d.css",
-    "main.js": "/real-estate-investment-calculator/static/js/main.62ecc49f.js",
+    "main.css": "/real-estate-investment-calculator/static/css/main.a8f59a95.css",
+    "main.js": "/real-estate-investment-calculator/static/js/main.00e0a291.js",
     "static/js/453.434e2ed5.chunk.js": "/real-estate-investment-calculator/static/js/453.434e2ed5.chunk.js",
     "static/media/KaTeX_AMS-Regular.ttf": "/real-estate-investment-calculator/static/media/KaTeX_AMS-Regular.853be92419a6c3766b9a.ttf",
     "static/media/KaTeX_Main-Regular.ttf": "/real-estate-investment-calculator/static/media/KaTeX_Main-Regular.9eba1d77abcf2aa6e94e.ttf",
@@ -64,12 +64,12 @@
     "static/media/KaTeX_Size3-Regular.woff": "/real-estate-investment-calculator/static/media/KaTeX_Size3-Regular.7947224e8a9914fa332b.woff",
     "static/media/KaTeX_Size3-Regular.woff2": "/real-estate-investment-calculator/static/media/KaTeX_Size3-Regular.e1951519f6f0596f7356.woff2",
     "index.html": "/real-estate-investment-calculator/index.html",
-    "main.7982113d.css.map": "/real-estate-investment-calculator/static/css/main.7982113d.css.map",
-    "main.62ecc49f.js.map": "/real-estate-investment-calculator/static/js/main.62ecc49f.js.map",
+    "main.a8f59a95.css.map": "/real-estate-investment-calculator/static/css/main.a8f59a95.css.map",
+    "main.00e0a291.js.map": "/real-estate-investment-calculator/static/js/main.00e0a291.js.map",
     "453.434e2ed5.chunk.js.map": "/real-estate-investment-calculator/static/js/453.434e2ed5.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.7982113d.css",
-    "static/js/main.62ecc49f.js"
+    "static/css/main.a8f59a95.css",
+    "static/js/main.00e0a291.js"
   ]
 }
