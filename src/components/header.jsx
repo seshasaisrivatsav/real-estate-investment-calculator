@@ -1,47 +1,96 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext';
+import './header.css';
+
+const MoonIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+  </svg>
+);
+
+const SunIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="5" />
+    <line x1="12" y1="1" x2="12" y2="3" />
+    <line x1="12" y1="21" x2="12" y2="23" />
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+    <line x1="1" y1="12" x2="3" y2="12" />
+    <line x1="21" y1="12" x2="23" y2="12" />
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+  </svg>
+);
+
+const MenuIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <line x1="3" y1="12" x2="21" y2="12" />
+    <line x1="3" y1="18" x2="21" y2="18" />
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+const navLinks = [
+  { to: '/', label: 'Calculator', exact: true },
+  { to: '/data-analysis', label: 'Data Analysis' },
+  { to: '/roi-calculator', label: 'ROI Calculator' },
+];
 
 const Header = () => {
+  const { dark, toggle } = useTheme();
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
-    <header style={styles.header}>
-      <nav>
-        <ul style={styles.navList}>
-          <li style={styles.navItem}>
-            <Link to="/" style={styles.link}>Home</Link>
-          </li>
-          <li style={styles.navItem}>
-            <Link to="/data-analysis" style={styles.link}>Data Analysis</Link>
-          </li>
-          <li style={styles.navItem}>
-            <Link to="/roi-calculator" style={styles.link}>ROI Calculator</Link>
-          </li>
-        </ul>
-      </nav>
+    <header className="site-header">
+      <div className="header-inner">
+        <div className="header-brand">
+          <span className="brand-icon">🏠</span>
+          <span className="brand-name">PropCalc</span>
+        </div>
+
+        <nav className={`header-nav ${menuOpen ? 'open' : ''}`}>
+          {navLinks.map(({ to, label, exact }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={exact}
+              className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+              onClick={() => setMenuOpen(false)}
+            >
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="header-actions">
+          <button
+            className="btn-icon theme-toggle"
+            onClick={toggle}
+            aria-label="Toggle dark mode"
+            title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {dark ? <SunIcon /> : <MoonIcon />}
+          </button>
+
+          <button
+            className="btn-icon hamburger"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? <CloseIcon /> : <MenuIcon />}
+          </button>
+        </div>
+      </div>
     </header>
   );
-};
-
-const styles = {
-  header: {
-    backgroundColor: '#333',
-    padding: '10px 20px',
-    color: '#fff',
-  },
-  navList: {
-    listStyle: 'none',
-    display: 'flex',
-    gap: '20px',
-    margin: 0,
-    padding: 0,
-  },
-  navItem: {
-    margin: 0,
-  },
-  link: {
-    color: '#fff',
-    textDecoration: 'none',
-    fontSize: '18px',
-  },
 };
 
 export default Header;

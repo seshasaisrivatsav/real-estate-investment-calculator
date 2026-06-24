@@ -1,37 +1,103 @@
-.input-container-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.input-container {
-  margin-bottom: 10px;
-  width: 13%; /* Adjusted to fit 7 fields in a row */
-  min-width: 120px;
-}
-
-.input-container label {
-  font-size: 14px;
-}
-
-.input-container input {
-  padding: 8px; /* Reduced padding */
+.input-fields {
   width: 100%;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px; /* Smaller font size for inputs */
-  transition: border-color 0.3s ease;
 }
 
-.input-container input:focus {
-  border-color: #007bff;
+.input-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 14px;
+}
+
+/* ── Individual field ────────────────────────────────────────── */
+.input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-label);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.field-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field-input-wrap input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  background: var(--card-bg);
+  color: var(--text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.field-input-wrap input::-webkit-outer-spin-button,
+.field-input-wrap input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.field-input-wrap input:focus {
   outline: none;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
 }
 
-@media (max-width: 768px) {
-  .input-container {
-    width: 48%; /* Adjusted for responsiveness */
+.field-input-wrap input.has-prefix {
+  padding-left: 26px;
+}
+
+.field-affix {
+  position: absolute;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.field-prefix { left: 9px; }
+.field-suffix { right: 8px; font-size: 11px; }
+
+/* ── Error state ─────────────────────────────────────────────── */
+.input-error .field-input-wrap input {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* ── Hint row ────────────────────────────────────────────────── */
+.property-tax-note {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: var(--warning-light);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+}
+
+@media (max-width: 600px) {
+  .input-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

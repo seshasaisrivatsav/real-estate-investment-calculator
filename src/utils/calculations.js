@@ -1,180 +1,189 @@
 
 const calculateEverything = ({
-  homePrice, 
-  downpaymentPercentage, 
-  interestRate, 
-  loanTerm, 
-  estimatedRent, 
-  hoa, 
-  annualMaintenance, 
-  propertyTaxPercentage, 
+  homePrice,
+  downpaymentPercentage,
+  interestRate,
+  loanTerm,
+  estimatedRent,
+  hoa,
+  annualMaintenance,
+  propertyTaxPercentage,
   propertyManagementFeePercentage,
   closingCosts,
-  initialRepairs
+  initialRepairs,
+  vacancyRate = 5,
+  customAppreciationRate = 3,
 }) => {
+  const downpayment = (homePrice * downpaymentPercentage) / 100;
+  const loanPrincipal = homePrice * (1 - downpaymentPercentage / 100);
 
-  const downpayment = (homePrice*downpaymentPercentage)/100;
-  // STEP 1: [ { year: 1 , interestPaid: xx, principalPaid: xx, monthlyPayment: xx}]
-  const amortization = calculateAmortization( (homePrice*(100-downpaymentPercentage)/100), interestRate, loanTerm );
-
-  // STEP 2: { monthly: {rent, propertyTax, hoa, maintenance, propertyManagementFee, mortgage}, yearly }
-  const totalExpenses = calculateExpenses({estimatedRent, homePrice, hoa, 
-    propertyTaxPercentage, monthlyPayment: amortization[0].monthlyPayment, annualMaintenance, propertyManagementFeePercentage});
-
-  // STEP 3: calculate cashflow { monthlyCashFlow: xx, yaerlyCashFlow: xx }
+  const amortization = calculateAmortization(loanPrincipal, interestRate, loanTerm);
+  const totalExpenses = calculateExpenses({
+    estimatedRent,
+    homePrice,
+    hoa,
+    propertyTaxPercentage,
+    monthlyPayment: amortization[0].monthlyPayment,
+    annualMaintenance,
+    propertyManagementFeePercentage,
+    vacancyRate,
+  });
   const cashFlow = calculateCashFlow(totalExpenses);
-
   const initialCosts = closingCosts + initialRepairs + downpayment;
-  // STEP 4: calculate ROI
-  const equityROI = calculateROI({ homePrice, annualCashFlow: cashFlow.yearlyCashFlow, initialCosts });
-
-  // STEP 5: calculate Cashflow ROI
+  const equityROI = calculateROI({ homePrice, annualCashFlow: cashFlow.yearlyCashFlow, initialCosts, customAppreciationRate });
   const cashFlowROI = calculateCashFlowROI({ initialCosts, annualCashFlow: cashFlow.yearlyCashFlow });
+  const breakEvenMonths = cashFlow.monthlyCashFlow > 0
+    ? Math.ceil(initialCosts / cashFlow.monthlyCashFlow)
+    : null;
 
   return {
     amortization,
     operatingExpenses: totalExpenses,
     cashFlow,
-    equityROI, 
-    cashFlowROI
-  }
-
-}
-
+    equityROI,
+    cashFlowROI,
+    breakEvenMonths,
+    initialCosts,
+    customAppreciationRate,
+  };
+};
 
 const calculateAmortization = (loanAmount, interestRate, loanTerm) => {
   const result = [];
   const monthlyRate = interestRate / 100 / 12;
   const numberOfPayments = loanTerm * 12;
-  
+
   let balance = loanAmount;
   let month = 0;
   let totalInterestPaid = 0;
   let totalPrincipalPaid = 0;
 
-  // Monthly payment (fixed)
-  const monthlyPayment = loanAmount * monthlyRate / (1 - Math.pow(1 + monthlyRate, -numberOfPayments));
+  const monthlyPayment =
+    monthlyRate === 0
+      ? loanAmount / numberOfPayments
+      : (loanAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -numberOfPayments));
 
   while (balance > 0 && month < numberOfPayments) {
     const interestPayment = balance * monthlyRate;
     const principalPayment = monthlyPayment - interestPayment;
     balance -= principalPayment;
-
-    if (balance < 0) {
-      balance = 0; // Ensure balance does not go below zero
-    }
+    if (balance < 0) balance = 0;
 
     totalInterestPaid += interestPayment;
     totalPrincipalPaid += principalPayment;
 
-    // Store data annually
     if ((month + 1) % 12 === 0 || balance === 0) {
       result.push({
         year: Math.floor(month / 12) + 1,
         interestPaid: totalInterestPaid,
         principalPaid: totalPrincipalPaid,
-        monthlyPayment: monthlyPayment, // Add monthly payment to each object
+        monthlyPayment,
+        remainingBalance: balance,
       });
-
-      // Reset totals for the next year
       totalInterestPaid = 0;
       totalPrincipalPaid = 0;
     }
-
     month++;
   }
 
   return result;
 };
 
-const calculateExpenses = ({estimatedRent, homePrice, hoa, 
-  propertyTaxPercentage, monthlyPayment, annualMaintenance, propertyManagementFeePercentage}) => {
-  const res = {};
+const calculateExpenses = ({
+  estimatedRent,
+  homePrice,
+  hoa,
+  propertyTaxPercentage,
+  monthlyPayment,
+  annualMaintenance,
+  propertyManagementFeePercentage,
+  vacancyRate = 5,
+}) => {
+  const effectiveMonthlyRent = estimatedRent * (1 - vacancyRate / 100);
+  const monthlyVacancyLoss = estimatedRent - effectiveMonthlyRent;
+  const monthlyPropertyTax = (homePrice * propertyTaxPercentage) / 100 / 12;
+  const monthlyHoa = hoa;
+  const monthlyMaintenance = annualMaintenance / 12;
+  const monthlyMgmtFee = effectiveMonthlyRent * (propertyManagementFeePercentage / 100);
+  const monthlyMortgage = monthlyPayment;
 
-  res.monthly = {
-    monthlyCosts:  monthlyPayment+ (homePrice*propertyTaxPercentage/100)/12 + hoa + (annualMaintenance/12) + 
-    (estimatedRent*propertyManagementFeePercentage/100), 
-    rent: estimatedRent,
-    propertyTax: (homePrice*propertyTaxPercentage/100)/12,
-    hoa: hoa, 
-    maintenance: annualMaintenance/12, 
-    propertyManagementFee: estimatedRent*propertyManagementFeePercentage/100, 
-    mortgage: monthlyPayment 
-  }
-  res.yearly = {
-    yearlyCosts: res.monthly.monthlyCosts*12,
-    rent: estimatedRent*12,
-    propertyTax: (homePrice*propertyTaxPercentage/100),
-    hoa: hoa*12, 
-    maintenance: annualMaintenance, 
-    propertyManagementFee: 12*(estimatedRent*propertyManagementFeePercentage/100), 
-    mortgage: monthlyPayment*12 
-  }
+  const monthlyCosts =
+    monthlyMortgage + monthlyPropertyTax + monthlyHoa + monthlyMaintenance + monthlyMgmtFee;
 
-  return res;
-
-}
+  return {
+    monthly: {
+      rent: estimatedRent,
+      effectiveRent: effectiveMonthlyRent,
+      vacancyLoss: monthlyVacancyLoss,
+      propertyTax: monthlyPropertyTax,
+      hoa: monthlyHoa,
+      maintenance: monthlyMaintenance,
+      propertyManagementFee: monthlyMgmtFee,
+      mortgage: monthlyMortgage,
+      monthlyCosts,
+    },
+    yearly: {
+      rent: estimatedRent * 12,
+      effectiveRent: effectiveMonthlyRent * 12,
+      vacancyLoss: monthlyVacancyLoss * 12,
+      propertyTax: homePrice * (propertyTaxPercentage / 100),
+      hoa: hoa * 12,
+      maintenance: annualMaintenance,
+      propertyManagementFee: monthlyMgmtFee * 12,
+      mortgage: monthlyMortgage * 12,
+      yearlyCosts: monthlyCosts * 12,
+    },
+  };
+};
 
 const calculateCashFlow = (totalExpenses) => {
-  const monthlyCashFlow = totalExpenses.monthly.rent - 
-                            (totalExpenses.monthly.propertyTax + 
-                              totalExpenses.monthly.hoa  + 
-                              totalExpenses.monthly.maintenance + 
-                              totalExpenses.monthly.propertyManagementFee + 
-                              totalExpenses.monthly.mortgage );
+  const monthlyCashFlow =
+    totalExpenses.monthly.effectiveRent -
+    (totalExpenses.monthly.propertyTax +
+      totalExpenses.monthly.hoa +
+      totalExpenses.monthly.maintenance +
+      totalExpenses.monthly.propertyManagementFee +
+      totalExpenses.monthly.mortgage);
   return {
-    monthlyCashFlow: monthlyCashFlow,
-    yearlyCashFlow: monthlyCashFlow*12
-  };                              
-}
+    monthlyCashFlow,
+    yearlyCashFlow: monthlyCashFlow * 12,
+  };
+};
 
-/**
+const calculateROI = ({ homePrice, annualCashFlow, initialCosts, customAppreciationRate = 3 }) => {
+  const rateEntries = [
+    { key: '2Percent', rate: 0.02 },
+    { key: '3Percent', rate: 0.03 },
+    { key: '4Percent', rate: 0.04 },
+    { key: 'customPercent', rate: customAppreciationRate / 100 },
+  ];
+  const yearsList = [5, 10, 15];
 
-Total ROI = (totalProfit/totalInvestment) *100;
-totalProfit = totalCashFlow+capitalGain
-capitalGain = (futureHomeValue) - (purchasePrice)
-totalInvestment = downPayment+closingCosts+InitialReparirs
-
- */
-const calculateROI = ({ homePrice, annualCashFlow, initialCosts }) => {
-  const appreciationRates = [0.02, 0.03, 0.04];
-  const yearsList = [5, 10, 15]; 
-  
-  let res = {};
-
-  yearsList.forEach(years => {
+  const res = {};
+  yearsList.forEach((years) => {
     res[years] = {};
-
-    appreciationRates.forEach(rate => {
+    rateEntries.forEach(({ key, rate }) => {
       const salePrice = calculateAppreciation(homePrice, years, rate);
-      const capitalGain = salePrice - homePrice;
+      const sellingCosts = salePrice * 0.06; // ~6% realtor + closing fees
+      const capitalGain = salePrice - homePrice - sellingCosts;
       const totalCashFlow = years * annualCashFlow;
       const roi = ((totalCashFlow + capitalGain) * 100) / initialCosts;
-
-      res[years][`${(rate * 100).toFixed(0)}Percent`] = roi.toFixed(2);
+      res[years][key] = roi.toFixed(2);
     });
   });
 
   return res;
 };
 
-const calculateCashFlowROI = ({initialCosts, annualCashFlow}) => {
-  //  const initialCosts =  DownPayment+closingcosts+remodelling;
-  // const cashFlow =  annualCashFlow/initialcosts;
-  const res = {};
-  res['5'] = 100*(5*annualCashFlow)/initialCosts;
-  res['10'] = 100*(10*annualCashFlow)/initialCosts;
-  res['15'] = 100*(15*annualCashFlow)/initialCosts;
+const calculateCashFlowROI = ({ initialCosts, annualCashFlow }) => {
+  return {
+    5: (100 * 5 * annualCashFlow) / initialCosts,
+    10: (100 * 10 * annualCashFlow) / initialCosts,
+    15: (100 * 15 * annualCashFlow) / initialCosts,
+  };
+};
 
-  return res;
-}
+const calculateAppreciation = (initialValue, years, appreciationRate) =>
+  initialValue * Math.pow(1 + appreciationRate, years);
 
-/**
- FutureValue = InitialValue  * (1+AppreciatioRate)^Years
- */
-const calculateAppreciation = (initialValue, years, appreciationRate) => {
-  return initialValue*Math.pow(1+appreciationRate, years);
-}
-  
 export { calculateAmortization, calculateEverything };
-  

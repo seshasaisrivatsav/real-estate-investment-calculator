@@ -1,65 +1,30 @@
 import React from "react";
-import { useTable } from "react-table";
 
 function CashFlowSummaryTable({ breakdownData }) {
-  const columns = React.useMemo(
-    () => [
-      {
-        Header: "Item",
-        accessor: "item",
-      },
-      {
-        Header: "Monthly ($)",
-        accessor: "monthly",
-      },
-      {
-        Header: "Yearly ($)",
-        accessor: "yearly",
-      },
-    ],
-    []
-  );
-
-  const breakdownTableProps = useTable({
-    columns,
-    data: breakdownData,
-  });
-
   return (
-    <div>
-      <div className="output-container">
-        <h2>Cash Flow Summary</h2>
-        <table
-          {...breakdownTableProps.getTableProps()}
-          className="output-table"
-        >
+    <div className="output-container">
+      <h2>💵 Cash Flow Summary</h2>
+      <div className="data-table-wrap">
+        <table className="data-table">
           <thead>
-            {breakdownTableProps.headerGroups.map((headerGroup) => (
-              <tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column) => {
-                  const { key, ...columnProps } = column.getHeaderProps();
-                  return (
-                    <th key={key} {...columnProps}>
-                      {column.render("Header")}
-                    </th>
-                  );
-                })}
+            <tr>
+              <th style={{ textAlign: "left" }}>Item</th>
+              <th>Monthly</th>
+              <th>Yearly</th>
+            </tr>
+          </thead>
+          <tbody>
+            {breakdownData.map((row, i) => (
+              <tr key={i}>
+                <td className="label">{row.item}</td>
+                <td className={row.isHighlight ? (row.positive ? "positive" : "negative") : ""}>
+                  {row.monthly}
+                </td>
+                <td className={row.isHighlight ? (row.positive ? "positive" : "negative") : ""}>
+                  {row.yearly}
+                </td>
               </tr>
             ))}
-          </thead>
-          <tbody {...breakdownTableProps.getTableBodyProps()}>
-            {breakdownTableProps.rows.map((row) => {
-              breakdownTableProps.prepareRow(row);
-              return (
-                <tr key={row} {...row.getRowProps()}>
-                  {row.cells.map((cell) => {
-                    return (
-                      <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
           </tbody>
         </table>
       </div>

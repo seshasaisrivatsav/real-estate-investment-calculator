@@ -1,195 +1,235 @@
-import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-} from 'recharts';
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer,
+} from "recharts";
+import "./DataAnalysis.css";
+
+const fmt = (n) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n ?? 0);
+
+const fmtPct = (n) => `${Number(n).toFixed(1)}%`;
+
+const COLORS = ["#1d4ed8", "#16a34a", "#d97706", "#dc2626", "#7c3aed", "#0891b2"];
+
+const CurrencyTooltip = ({ active, payload, label }) => {
+  if (!active || !payload || !payload.length) return null;
+  return (
+    <div className="chart-tooltip">
+      <p className="chart-tooltip-label">{label}</p>
+      {payload.map((entry) => (
+        <p key={entry.name} style={{ color: entry.color, margin: "3px 0" }}>
+          <strong>{entry.name}:</strong> {fmt(entry.value)}
+        </p>
+      ))}
+    </div>
+  );
+};
+
+const PctTooltip = ({ active, payload, label }) => {
+  if (!active || !payload || !payload.length) return null;
+  return (
+    <div className="chart-tooltip">
+      <p className="chart-tooltip-label">{label}</p>
+      {payload.map((entry) => (
+        <p key={entry.name} style={{ color: entry.color, margin: "3px 0" }}>
+          <strong>{entry.name}:</strong> {fmtPct(entry.value)}
+        </p>
+      ))}
+    </div>
+  );
+};
+
+const PieTooltip = ({ active, payload }) => {
+  if (!active || !payload || !payload.length) return null;
+  const d = payload[0];
+  return (
+    <div className="chart-tooltip">
+      <p style={{ margin: 0, fontWeight: 600 }}>{d.name}</p>
+      <p style={{ margin: "3px 0", color: d.payload.fill }}>{fmt(d.value)}</p>
+      <p style={{ margin: 0, color: "var(--text-muted)", fontSize: 12 }}>{d.payload.percentage}</p>
+    </div>
+  );
+};
+
+const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, name, percentage }) => {
+  const RADIAN = Math.PI / 180;
+  const radius = innerRadius + (outerRadius - innerRadius) * 1.45;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  return (
+    <text x={x} y={y} fill="var(--text)" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central" fontSize={11}>
+      {`${name} (${percentage})`}
+    </text>
+  );
+};
 
 const DataAnalysis = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { inputs, analytics } = location.state || {};
 
-  // Redirect to Calculator if state is missing
   if (!inputs || !analytics) {
-    navigate("/"); // Redirect to the home page
-    return null; // Render nothing while redirecting
+    return (
+      <div className="da-container">
+        <div className="empty-state card" style={{ marginTop: 60 }}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M3 3v18h18" /><path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" />
+          </svg>
+          <p style={{ marginBottom: 16 }}>No data to display. Run the calculator first.</p>
+          <button className="btn btn-primary" onClick={() => navigate("/")}>
+            Go to Calculator
+          </button>
+        </div>
+      </div>
+    );
   }
 
-  // Data for yearly operating expenses (bar chart)
+  const { yearly } = analytics.operatingExpenses;
+  const customRate = analytics.customAppreciationRate ?? 3;
+
   const yearlyExpensesData = [
     {
-      name: 'Yearly Expenses',
-      Rent: analytics.operatingExpenses.yearly.rent,
-      Costs:
-        analytics.operatingExpenses.yearly.propertyTax +
-        analytics.operatingExpenses.yearly.hoa +
-        analytics.operatingExpenses.yearly.maintenance +
-        analytics.operatingExpenses.yearly.propertyManagementFee +
-        analytics.operatingExpenses.yearly.mortgage,
+      name: "Annual Totals",
+      "Effective Rent": yearly.effectiveRent,
+      "Property Tax": yearly.propertyTax,
+      HOA: yearly.hoa,
+      Maintenance: yearly.maintenance,
+      "Mgmt Fee": yearly.propertyManagementFee,
+      Mortgage: yearly.mortgage,
     },
   ];
 
-  // Data for Cash Flow ROI (line chart)
   const cashFlowROIData = Object.entries(analytics.cashFlowROI).map(([year, roi]) => ({
-    year: `${year} Years`,
-    ROI: roi,
+    year: `${year} yrs`,
+    "Cash-on-Cash Return": parseFloat(roi),
   }));
 
-  // Data for Equity ROI (line chart)
   const equityROIData = Object.entries(analytics.equityROI).map(([year, rates]) => ({
-    year: `${year} Years`,
-    ...rates, // Spread the rates (2%, 3%, 4%)
-    SP500: 8 * parseInt(year), // S&P 500 average ROI (8% per year)
+    year: `${year} yrs`,
+    "2% Appr.": parseFloat(rates["2Percent"]),
+    "3% Appr.": parseFloat(rates["3Percent"]),
+    "4% Appr.": parseFloat(rates["4Percent"]),
+    [`${customRate}% Custom`]: parseFloat(rates["customPercent"]),
+    "S&P 500 (~10%)": 10 * parseInt(year),
   }));
 
-  // Data for yearly expenses breakdown (pie chart)
-  const yearlyExpensesBreakdown = [
-    { name: 'Rent', value: analytics.operatingExpenses.yearly.rent },
-    { name: 'Property Tax', value: analytics.operatingExpenses.yearly.propertyTax },
-    { name: 'HOA', value: analytics.operatingExpenses.yearly.hoa },
-    { name: 'Maintenance', value: analytics.operatingExpenses.yearly.maintenance },
-    { name: 'Mgmt Fee', value: analytics.operatingExpenses.yearly.propertyManagementFee },
-    { name: 'Mortgage', value: analytics.operatingExpenses.yearly.mortgage },
-  ];
+  const pieData = [
+    { name: "Property Tax", value: yearly.propertyTax },
+    { name: "HOA", value: yearly.hoa },
+    { name: "Maintenance", value: yearly.maintenance },
+    { name: "Mgmt Fee", value: yearly.propertyManagementFee },
+    { name: "Mortgage", value: yearly.mortgage },
+  ].filter((d) => d.value > 0);
 
-  // Calculate total yearly expenses
-  const totalYearlyExpenses = yearlyExpensesBreakdown.reduce(
-    (total, expense) => total + expense.value,
-    0
-  );
-
-  // Add percentage to each expense
-  const yearlyExpensesWithPercentage = yearlyExpensesBreakdown.map((expense) => ({
-    ...expense,
-    percentage: ((expense.value / totalYearlyExpenses) * 100).toFixed(2) + '%',
+  const totalCosts = pieData.reduce((s, d) => s + d.value, 0);
+  const pieDataWithPct = pieData.map((d) => ({
+    ...d,
+    percentage: totalCosts > 0 ? `${((d.value / totalCosts) * 100).toFixed(1)}%` : "0%",
   }));
-
-  // Colors for pie chart
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF1919'];
 
   return (
-    <div style={styles.container}>
-      <h2>Data Analysis</h2>
-      <button style={styles.backButton} onClick={() => navigate("/")}>
-        Go Back to Calculator
-      </button>
+    <div className="da-container">
+      <div className="da-header">
+        <div>
+          <h1 className="calc-title">Data Analysis</h1>
+          <p className="calc-subtitle">Visual breakdown of your investment performance</p>
+        </div>
+        <button className="btn btn-outline" onClick={() => navigate("/")}>
+          ← Back to Calculator
+        </button>
+      </div>
 
-      {/* Row 1: Yearly Operating Expenses and Yearly Breakdown */}
-      <div style={styles.row}>
-        <div style={styles.chartContainer}>
-          <h3>Yearly Operating Expenses</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={yearlyExpensesData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="Rent" fill="#8884d8" name="Rent" />
-              <Bar dataKey="Costs" fill="#82ca9d" name="Costs" />
+      <div className="da-grid">
+        {/* Bar chart */}
+        <div className="da-chart-card">
+          <h3 className="da-chart-title">Annual Income vs. Expenses</h3>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={yearlyExpensesData} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="name" tick={{ fill: "var(--text-muted)", fontSize: 12 }} />
+              <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fill: "var(--text-muted)", fontSize: 11 }} />
+              <Tooltip content={<CurrencyTooltip />} />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Bar dataKey="Effective Rent" fill="#1d4ed8" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Mortgage" fill="#dc2626" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Property Tax" fill="#d97706" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Maintenance" fill="#7c3aed" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Mgmt Fee" fill="#0891b2" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="HOA" fill="#16a34a" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        <div style={styles.chartContainer}>
-          <h3>Yearly Expenses Breakdown</h3>
-          <ResponsiveContainer width="100%" height={300}>
+        {/* Pie chart */}
+        <div className="da-chart-card">
+          <h3 className="da-chart-title">Annual Cost Breakdown</h3>
+          <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie
-                data={yearlyExpensesWithPercentage}
+                data={pieDataWithPct}
                 dataKey="value"
                 nameKey="name"
                 cx="50%"
                 cy="50%"
-                outerRadius={100}
-                fill="#8884d8"
-                label={({ name, value, percentage }) => `${name}: $${value} (${percentage})`}
+                outerRadius={90}
+                label={renderPieLabel}
+                labelLine={false}
               >
-                {yearlyExpensesWithPercentage.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                {pieDataWithPct.map((_, index) => (
+                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
-              <Legend />
+              <Tooltip content={<PieTooltip />} />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
             </PieChart>
           </ResponsiveContainer>
         </div>
-      </div>
 
-      {/* Row 2: Cash Flow ROI and Equity ROI */}
-      <div style={styles.row}>
-        <div style={styles.chartContainer}>
-          <h3>Cash Flow ROI Over Time</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={cashFlowROIData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="year" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="ROI" stroke="#82ca9d" name="Cash Flow ROI (%)" />
+        {/* Cash-on-Cash line chart */}
+        <div className="da-chart-card">
+          <h3 className="da-chart-title">Cash-on-Cash Return Over Time</h3>
+          <ResponsiveContainer width="100%" height={280}>
+            <LineChart data={cashFlowROIData} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="year" tick={{ fill: "var(--text-muted)", fontSize: 12 }} />
+              <YAxis tickFormatter={(v) => `${v.toFixed(0)}%`} tick={{ fill: "var(--text-muted)", fontSize: 11 }} />
+              <Tooltip content={<PctTooltip />} />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Line
+                type="monotone"
+                dataKey="Cash-on-Cash Return"
+                stroke="#1d4ed8"
+                strokeWidth={2.5}
+                dot={{ r: 5, fill: "#1d4ed8" }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        <div style={styles.chartContainer}>
-          <h3>Equity ROI Over Time</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={equityROIData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="year" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="2Percent" stroke="#8884d8" name="2% Appreciation" />
-              <Line type="monotone" dataKey="3Percent" stroke="#82ca9d" name="3% Appreciation" />
-              <Line type="monotone" dataKey="4Percent" stroke="#ff7300" name="4% Appreciation" />
-              <Line type="monotone" dataKey="SP500" stroke="#000000" name="S&P 500 (8% ROI)" strokeDasharray="5 5" />
+        {/* Equity ROI line chart */}
+        <div className="da-chart-card">
+          <h3 className="da-chart-title">Equity ROI vs. S&amp;P 500</h3>
+          <p className="da-chart-note">After ~6% selling costs deducted from sale price</p>
+          <ResponsiveContainer width="100%" height={260}>
+            <LineChart data={equityROIData} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="year" tick={{ fill: "var(--text-muted)", fontSize: 12 }} />
+              <YAxis tickFormatter={(v) => `${v.toFixed(0)}%`} tick={{ fill: "var(--text-muted)", fontSize: 11 }} />
+              <Tooltip content={<PctTooltip />} />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Line type="monotone" dataKey="2% Appr." stroke="#94a3b8" strokeWidth={2} dot={{ r: 4 }} />
+              <Line type="monotone" dataKey="3% Appr." stroke="#1d4ed8" strokeWidth={2} dot={{ r: 4 }} />
+              <Line type="monotone" dataKey="4% Appr." stroke="#16a34a" strokeWidth={2} dot={{ r: 4 }} />
+              <Line type="monotone" dataKey={`${customRate}% Custom`} stroke="#d97706" strokeWidth={2.5} strokeDasharray="6 3" dot={{ r: 5 }} />
+              <Line type="monotone" dataKey="S&P 500 (~10%)" stroke="#7c3aed" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    padding: '20px',
-    maxWidth: '1200px',
-    margin: '0 auto',
-    fontFamily: 'Arial, sans-serif',
-  },
-  backButton: {
-    padding: '10px 20px',
-    backgroundColor: '#007bff',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    marginBottom: '20px',
-  },
-  row: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginBottom: '40px',
-  },
-  chartContainer: {
-    flex: 1,
-    margin: '0 10px',
-  },
 };
 
 export default DataAnalysis;

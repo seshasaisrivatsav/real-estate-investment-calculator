@@ -1,38 +1,57 @@
-import React from 'react';
-import BlockFormula from '../utilComponents/blockFormula';
+import React from "react";
+import BlockFormula from "../utilComponents/blockFormula";
 
-function EquityROITable({ equityROI }) {
+const Tooltip = ({ text }) => (
+  <span className="tooltip-wrap">
+    <span className="tooltip-icon">?</span>
+    <span className="tooltip-box">{text}</span>
+  </span>
+);
+
+function EquityROITable({ equityROI, customAppreciationRate = 3 }) {
   return (
     <div className="output-container">
-      <h2>Equity ROI</h2>
-    
-      <table className="output-table">
-        <thead>
-          <tr>
-            <th>Years</th>
-            <th>2%</th>
-            <th>3%</th>
-            <th>4%</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Object.keys(equityROI).map((year) => (
-            <tr key={year}>
-              <td>{year} Years</td>
-              <td>{equityROI[year]["2Percent"]}%</td>
-              <td>{equityROI[year]["3Percent"]}%</td>
-              <td>{equityROI[year]["4Percent"]}%</td>
+      <h2>
+        🏠 Equity ROI
+        <Tooltip text="Total ROI including capital gain (after ~6% selling costs) plus cumulative cash flow, relative to your initial cash investment." />
+      </h2>
+      <div className="data-table-wrap">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Years</th>
+              <th>2% Appr.</th>
+              <th>3% Appr.</th>
+              <th>4% Appr.</th>
+              <th>{customAppreciationRate}% Custom</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-      <p>This table gives the equity value for 5, 10, 15 years if the property values rose by 2, 3 and 4%</p>
-      <div>
-        <strong>Equity ROI:</strong>
-        <BlockFormula formula="\text{AppraisedHomeValue}_{\text{future}} = \text{HomeValue}_{\text{initial}} \times (1 + \text{AppreciationRate})^{\text{Years}}" />
-        <BlockFormula formula="CapitalGain = AppraisedHomeValue  - HomePurchasePrice" />
-        <BlockFormula formula="InitialInvestment = Downpayment + ClosingCosts + InitialCosts" />
-        <BlockFormula formula="CapitalGainROI = \frac{(TotalCashFlow + CapitalGain) * 100}{InitialInvestment}" />
+          </thead>
+          <tbody>
+            {Object.keys(equityROI).map((year) => {
+              const row = equityROI[year];
+              return (
+                <tr key={year}>
+                  <td>{year} yrs</td>
+                  {["2Percent", "3Percent", "4Percent", "customPercent"].map((k) => {
+                    const v = parseFloat(row[k]);
+                    return (
+                      <td key={k} className={v >= 0 ? "positive" : "negative"}>
+                        {v.toFixed(1)}%
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <div className="formula-section">
+        <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 8px" }}>
+          Selling costs (~6% realtor + fees) are deducted from the projected sale price.
+        </p>
+        <BlockFormula formula="\text{SalePrice} = V_0 \times (1+r)^t \quad;\quad \text{SellingCosts} = 6\%" />
+        <BlockFormula formula="\text{EquityROI} = \frac{(CashFlow_{total} + CapitalGain) \times 100}{InitialInvestment}" />
       </div>
     </div>
   );
