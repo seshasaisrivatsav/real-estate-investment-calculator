@@ -12,7 +12,7 @@ import "./calculator.css";
 const DEFAULT_INPUTS = {
   homePrice: 500000,
   downpaymentPercentage: 20,
-  interestRate: 7,
+  interestRate: 6,
   loanTerm: 30,
   estimatedRent: 3000,
   hoa: 0,
