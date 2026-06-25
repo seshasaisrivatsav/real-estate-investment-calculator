@@ -134,6 +134,25 @@ const DataAnalysis = () => {
     percentage: totalCosts > 0 ? `${((d.value / totalCosts) * 100).toFixed(1)}%` : "0%",
   }));
 
+  // Plain-English investment summary
+  const initialInvestment = analytics.initialCosts;
+  const monthlyCF = analytics.cashFlow.monthlyCashFlow;
+  const rentalRate = analytics.rentalAppreciationRate ?? 3;
+
+  const summaryRows = [5, 10, 15].map((years) => {
+    const equityRow = analytics.equityROI[years];
+    const cfROI = analytics.cashFlowROI[years];
+    const appRate = customRate / 100;
+    const salePrice = inputs.homePrice * Math.pow(1 + appRate, years);
+    const sellingCosts = salePrice * 0.06;
+    const capitalGain = salePrice - inputs.homePrice - sellingCosts;
+    const roi = parseFloat(equityRow["customPercent"]);
+    const dollarGain = (roi / 100) * initialInvestment;
+    const spx10 = (Math.pow(1.10, years) - 1) * initialInvestment;
+    return { years, roi, dollarGain, salePrice, capitalGain, cfROI, spx10 };
+  });
+
+
   return (
     <div className="da-container">
       <div className="da-header">
@@ -145,6 +164,62 @@ const DataAnalysis = () => {
           ← Back to Calculator
         </button>
       </div>
+
+      {/* Plain-English Summary */}
+      <div className="da-summary-card">
+        <h3 className="da-chart-title" style={{ marginBottom: 16 }}>
+          📋 What does this mean for you?
+        </h3>
+        <p className="da-summary-intro">
+          You're investing <strong>{fmt(initialInvestment)}</strong> upfront in a{" "}
+          <strong>{fmt(inputs.homePrice)}</strong> property.
+          Year-1 cash flow is{" "}
+          <strong style={{ color: monthlyCF >= 0 ? "var(--success)" : "var(--danger)" }}>
+            {fmt(monthlyCF)}/mo
+          </strong>
+          , with rent growing at <strong>{rentalRate}%/yr</strong> and home appreciation at{" "}
+          <strong>{customRate}%/yr</strong>.
+        </p>
+        <div className="da-table-wrap">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Holding Period</th>
+                <th>Est. Sale Price</th>
+                <th>Capital Gain</th>
+                <th>Total $ Gain</th>
+                <th>Your ROI</th>
+                <th>vs S&amp;P 500 (10%)</th>
+                <th>Verdict</th>
+              </tr>
+            </thead>
+            <tbody>
+              {summaryRows.map(({ years, roi, dollarGain, salePrice, capitalGain, spx10 }) => {
+                const beats = dollarGain > spx10;
+                return (
+                  <tr key={years}>
+                    <td><strong>{years} years</strong></td>
+                    <td>{fmt(salePrice)}</td>
+                    <td className={capitalGain >= 0 ? "positive" : "negative"}>{fmt(capitalGain)}</td>
+                    <td className={dollarGain >= 0 ? "positive" : "negative"}>{fmt(dollarGain)}</td>
+                    <td className={roi >= 0 ? "positive" : "negative"}>{roi.toFixed(1)}%</td>
+                    <td className="positive">{fmt(spx10)}</td>
+                    <td>
+                      <span className={`verdict-chip ${beats ? "verdict-win" : "verdict-lose"}`}>
+                        {beats ? "🏠 Beats market" : "📈 Market wins"}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p className="da-summary-note">
+          * Capital gain = sale price − purchase price − 6% selling costs. Total $ gain = capital gain + cumulative cash flow (rent compounded at {rentalRate}%/yr). S&P 500 comparison uses 10% annualized on your <strong>{fmt(initialInvestment)}</strong> initial investment.
+        </p>
+      </div>
+
 
       <div className="da-grid">
         {/* Bar chart */}

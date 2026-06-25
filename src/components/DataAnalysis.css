@@ -67,3 +67,47 @@
   }
   .da-container { padding: 20px 16px 40px; }
 }
+
+/* ── Plain-English Summary ────────────────────────────────────── */
+.da-summary-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+}
+
+.da-summary-intro {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0 0 16px;
+  line-height: 1.7;
+}
+
+.da-summary-intro strong { color: var(--text); }
+
+.da-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.da-summary-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 12px 0 0;
+  line-height: 1.6;
+}
+
+.verdict-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.verdict-win  { background: var(--success-light); color: var(--success); }
+.verdict-lose { background: #fee2e2; color: var(--danger); }
