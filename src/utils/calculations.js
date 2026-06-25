@@ -13,6 +13,7 @@ const calculateEverything = ({
   initialRepairs,
   vacancyRate = 5,
   customAppreciationRate = 3,
+  rentalAppreciationRate = 3,
 }) => {
   const downpayment = (homePrice * downpaymentPercentage) / 100;
   const loanPrincipal = homePrice * (1 - downpaymentPercentage / 100);
@@ -30,8 +31,20 @@ const calculateEverything = ({
   });
   const cashFlow = calculateCashFlow(totalExpenses);
   const initialCosts = closingCosts + initialRepairs + downpayment;
-  const equityROI = calculateROI({ homePrice, annualCashFlow: cashFlow.yearlyCashFlow, initialCosts, customAppreciationRate });
-  const cashFlowROI = calculateCashFlowROI({ initialCosts, annualCashFlow: cashFlow.yearlyCashFlow });
+  const equityROI = calculateROI({
+    homePrice,
+    operatingExpenses: totalExpenses,
+    propertyManagementFeePercentage,
+    initialCosts,
+    customAppreciationRate,
+    rentalAppreciationRate,
+  });
+  const cashFlowROI = calculateCashFlowROI({
+    initialCosts,
+    operatingExpenses: totalExpenses,
+    propertyManagementFeePercentage,
+    rentalAppreciationRate,
+  });
   const breakEvenMonths = cashFlow.monthlyCashFlow > 0
     ? Math.ceil(initialCosts / cashFlow.monthlyCashFlow)
     : null;
@@ -45,6 +58,7 @@ const calculateEverything = ({
     breakEvenMonths,
     initialCosts,
     customAppreciationRate,
+    rentalAppreciationRate,
   };
 };
 
@@ -150,7 +164,21 @@ const calculateCashFlow = (totalExpenses) => {
   };
 };
 
-const calculateROI = ({ homePrice, annualCashFlow, initialCosts, customAppreciationRate = 3 }) => {
+// Rent grows each year; mortgage/tax/HOA/maintenance stay flat.
+const cumulativeCashFlow = (operatingExpenses, propertyManagementFeePercentage, years, rentalAppreciationRate) => {
+  const r = rentalAppreciationRate / 100;
+  const { monthly } = operatingExpenses;
+  const baseNetMonthlyRent = monthly.effectiveRent * (1 - propertyManagementFeePercentage / 100);
+  const fixedMonthly = monthly.mortgage + monthly.propertyTax + monthly.hoa + monthly.maintenance;
+  let total = 0;
+  for (let t = 1; t <= years; t++) {
+    const netRent = baseNetMonthlyRent * Math.pow(1 + r, t - 1);
+    total += (netRent - fixedMonthly) * 12;
+  }
+  return total;
+};
+
+const calculateROI = ({ homePrice, operatingExpenses, propertyManagementFeePercentage, initialCosts, customAppreciationRate = 3, rentalAppreciationRate = 3 }) => {
   const rateEntries = [
     { key: '2Percent', rate: 0.02 },
     { key: '3Percent', rate: 0.03 },
@@ -164,9 +192,9 @@ const calculateROI = ({ homePrice, annualCashFlow, initialCosts, customAppreciat
     res[years] = {};
     rateEntries.forEach(({ key, rate }) => {
       const salePrice = calculateAppreciation(homePrice, years, rate);
-      const sellingCosts = salePrice * 0.06; // ~6% realtor + closing fees
+      const sellingCosts = salePrice * 0.06;
       const capitalGain = salePrice - homePrice - sellingCosts;
-      const totalCashFlow = years * annualCashFlow;
+      const totalCashFlow = cumulativeCashFlow(operatingExpenses, propertyManagementFeePercentage, years, rentalAppreciationRate);
       const roi = ((totalCashFlow + capitalGain) * 100) / initialCosts;
       res[years][key] = roi.toFixed(2);
     });
@@ -175,11 +203,11 @@ const calculateROI = ({ homePrice, annualCashFlow, initialCosts, customAppreciat
   return res;
 };
 
-const calculateCashFlowROI = ({ initialCosts, annualCashFlow }) => {
+const calculateCashFlowROI = ({ initialCosts, operatingExpenses, propertyManagementFeePercentage, rentalAppreciationRate = 3 }) => {
   return {
-    5: (100 * 5 * annualCashFlow) / initialCosts,
-    10: (100 * 10 * annualCashFlow) / initialCosts,
-    15: (100 * 15 * annualCashFlow) / initialCosts,
+    5:  (cumulativeCashFlow(operatingExpenses, propertyManagementFeePercentage, 5,  rentalAppreciationRate) / initialCosts) * 100,
+    10: (cumulativeCashFlow(operatingExpenses, propertyManagementFeePercentage, 10, rentalAppreciationRate) / initialCosts) * 100,
+    15: (cumulativeCashFlow(operatingExpenses, propertyManagementFeePercentage, 15, rentalAppreciationRate) / initialCosts) * 100,
   };
 };
 

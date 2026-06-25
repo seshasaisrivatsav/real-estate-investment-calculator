@@ -75,6 +75,18 @@ const FIELDS = [
     sliderMax: 20,
     sliderStep: 1,
   },
+  {
+    label: "Rent Growth / yr",
+    key: "rentalAppreciationRate",
+    suffix: "% / yr",
+    hint: "Expected annual rent increase. US average ~3%. Compounds your cash flow over the holding period.",
+    step: 0.5,
+    min: 0,
+    max: 20,
+    sliderMin: 0,
+    sliderMax: 8,
+    sliderStep: 0.5,
+  },
 ];
 
 const FIELDS2 = [

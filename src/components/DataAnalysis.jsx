@@ -106,14 +106,19 @@ const DataAnalysis = () => {
     "Cash-on-Cash Return": parseFloat(roi),
   }));
 
-  const equityROIData = Object.entries(analytics.equityROI).map(([year, rates]) => ({
-    year: `${year} yrs`,
-    "2% Appr.": parseFloat(rates["2Percent"]),
-    "3% Appr.": parseFloat(rates["3Percent"]),
-    "4% Appr.": parseFloat(rates["4Percent"]),
-    [`${customRate}% Custom`]: parseFloat(rates["customPercent"]),
-    "S&P 500 (~10%)": 10 * parseInt(year),
-  }));
+  const equityROIData = Object.entries(analytics.equityROI).map(([year, rates]) => {
+    const y = parseInt(year);
+    return {
+      year: `${year} yrs`,
+      "2% Appr.": parseFloat(rates["2Percent"]),
+      "3% Appr.": parseFloat(rates["3Percent"]),
+      "4% Appr.": parseFloat(rates["4Percent"]),
+      [`${customRate}% Custom`]: parseFloat(rates["customPercent"]),
+      "S&P 500 (8%)":  parseFloat(((Math.pow(1.08,  y) - 1) * 100).toFixed(1)),
+      "S&P 500 (10%)": parseFloat(((Math.pow(1.10, y) - 1) * 100).toFixed(1)),
+      "S&P 500 (12%)": parseFloat(((Math.pow(1.12, y) - 1) * 100).toFixed(1)),
+    };
+  });
 
   const pieData = [
     { name: "Property Tax", value: yearly.propertyTax },
@@ -211,7 +216,7 @@ const DataAnalysis = () => {
         {/* Equity ROI line chart */}
         <div className="da-chart-card">
           <h3 className="da-chart-title">Equity ROI vs. S&amp;P 500</h3>
-          <p className="da-chart-note">After ~6% selling costs deducted from sale price</p>
+          <p className="da-chart-note">After ~6% selling costs; rent grows at your set rate each year</p>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={equityROIData} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -223,7 +228,9 @@ const DataAnalysis = () => {
               <Line type="monotone" dataKey="3% Appr." stroke="#1d4ed8" strokeWidth={2} dot={{ r: 4 }} />
               <Line type="monotone" dataKey="4% Appr." stroke="#16a34a" strokeWidth={2} dot={{ r: 4 }} />
               <Line type="monotone" dataKey={`${customRate}% Custom`} stroke="#d97706" strokeWidth={2.5} strokeDasharray="6 3" dot={{ r: 5 }} />
-              <Line type="monotone" dataKey="S&P 500 (~10%)" stroke="#7c3aed" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 4 }} />
+              <Line type="monotone" dataKey="S&P 500 (8%)"  stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="3 3" dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="S&P 500 (10%)" stroke="#7c3aed" strokeWidth={2}   strokeDasharray="4 4" dot={{ r: 4 }} />
+              <Line type="monotone" dataKey="S&P 500 (12%)" stroke="#ec4899" strokeWidth={1.5} strokeDasharray="3 3" dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>

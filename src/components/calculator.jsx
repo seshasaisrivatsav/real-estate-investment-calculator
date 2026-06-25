@@ -24,6 +24,7 @@ const DEFAULT_INPUTS = {
   initialRepairs: 4000,
   vacancyRate: 5,
   customAppreciationRate: 3,
+  rentalAppreciationRate: 3,
 };
 
 const fmt = (n) =>
@@ -72,11 +73,11 @@ function Calculator() {
     setInputs((prev) => {
       const next = { ...prev, [field]: newValue };
       if (field === "propertyTaxPercentage") {
-        next.annualPropertyTax = prev.homePrice * (newValue / 100);
+        next.annualPropertyTax = parseFloat((prev.homePrice * (newValue / 100)).toFixed(2));
       } else if (field === "annualPropertyTax") {
         next.propertyTaxPercentage = prev.homePrice > 0 ? parseFloat(((newValue / prev.homePrice) * 100).toFixed(4)) : 0;
       } else if (field === "homePrice") {
-        next.annualPropertyTax = newValue * (prev.propertyTaxPercentage / 100);
+        next.annualPropertyTax = parseFloat((newValue * (prev.propertyTaxPercentage / 100)).toFixed(2));
       }
       return next;
     });
@@ -217,19 +218,47 @@ function Calculator() {
         )}
         {results && results.breakEvenMonths && (
           <div className="metric-card">
-            <div className="metric-label">Break-Even</div>
+            <div className="metric-label">Break-Even (cash recouped)</div>
             <div className="metric-value">
               {results.breakEvenMonths >= 12
                 ? `${Math.floor(results.breakEvenMonths / 12)}y ${results.breakEvenMonths % 12}m`
-                : `${results.breakEvenMonths} months`}
+                : `${results.breakEvenMonths} mo`}
             </div>
           </div>
         )}
         {results && !results.breakEvenMonths && (
           <div className="metric-card">
-            <div className="metric-label">Break-Even</div>
-            <div className="metric-value negative">Never (negative CF)</div>
+            <div className="metric-label">Annual Cash Loss (Yr 1)</div>
+            <div className="metric-value negative">{fmt(Math.abs(results.cashFlow.yearlyCashFlow))}</div>
           </div>
+        )}
+        {results && (
+          <>
+            <div className="metric-card">
+              <div className="metric-label">Cash-on-Cash ROI (5 yr)</div>
+              <div className={`metric-value ${results.cashFlowROI[5] >= 0 ? "positive" : "negative"}`}>
+                {results.cashFlowROI[5].toFixed(1)}%
+              </div>
+            </div>
+            <div className="metric-card">
+              <div className="metric-label">Cash-on-Cash ROI (10 yr)</div>
+              <div className={`metric-value ${results.cashFlowROI[10] >= 0 ? "positive" : "negative"}`}>
+                {results.cashFlowROI[10].toFixed(1)}%
+              </div>
+            </div>
+            <div className="metric-card">
+              <div className="metric-label">Equity ROI 5yr (3% appr.)</div>
+              <div className={`metric-value ${parseFloat(results.equityROI[5]["3Percent"]) >= 0 ? "positive" : "negative"}`}>
+                {parseFloat(results.equityROI[5]["3Percent"]).toFixed(1)}%
+              </div>
+            </div>
+            <div className="metric-card">
+              <div className="metric-label">Equity ROI 10yr (3% appr.)</div>
+              <div className={`metric-value ${parseFloat(results.equityROI[10]["3Percent"]) >= 0 ? "positive" : "negative"}`}>
+                {parseFloat(results.equityROI[10]["3Percent"]).toFixed(1)}%
+              </div>
+            </div>
+          </>
         )}
       </div>
 
